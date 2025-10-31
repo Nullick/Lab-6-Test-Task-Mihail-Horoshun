@@ -19,11 +19,15 @@ public class ProductService : IProductService
 
     public async Task<Product> GetProductAsync()
     {
-        throw new NotImplementedException();
+        DbSet<Product> products = (DbSet<Product>)_dbContext.Products;
+        var mostExpensive = products.OrderByDescending(p => p.Price).FirstAsync();
+        return await mostExpensive;
     }
 
     public async Task<IEnumerable<Product>> GetProductsAsync()
     {
-        throw new NotImplementedException();
+        DbSet<Product> products = (DbSet<Product>)_dbContext.Products;
+        var prods = products.Where(p => p.ReceivedDate.Year == 2025 && p.Quantity > 1000);
+        return await prods.ToListAsync();
     }
 }
