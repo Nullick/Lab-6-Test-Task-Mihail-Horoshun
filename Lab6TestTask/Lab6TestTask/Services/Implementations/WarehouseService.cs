@@ -19,11 +19,34 @@ public class WarehouseService : IWarehouseService
 
     public async Task<Warehouse> GetWarehouseAsync()
     {
-        throw new NotImplementedException();
+        DbSet<Warehouse> warehouses = (DbSet<Warehouse>)_dbContext.Warehouses;
+        DbSet<Product> products = (DbSet<Product>)_dbContext.Products;
+
+        var prods = from warehouse in warehouses
+                    from product in products
+                    where product.WarehouseId == warehouse.WarehouseId
+                    where product.Status == Enums.ProductStatus.ReadyForDistribution
+                    select product;
+        
+        var answer = warehouses.Where(w => w.WarehouseId == prods.OrderByDescending(p => p.Price * p.Quantity).First().WarehouseId).FirstAsync();
+        
+        return await answer;
     }
 
     public async Task<IEnumerable<Warehouse>> GetWarehousesAsync()
     {
-       throw new NotImplementedException();
+        DbSet<Warehouse> warehouses = (DbSet<Warehouse>)_dbContext.Warehouses;
+        DbSet<Product> products = (DbSet<Product>)_dbContext.Products;
+        
+        var answer = from warehouse in warehouses
+                     from product in products
+                     where product.ReceivedDate.Month == 4
+                     || product.ReceivedDate.Month == 5
+                     || product.ReceivedDate.Month == 6
+                     && product.ReceivedDate.Year == 2025
+                     where warehouse.WarehouseId == product.WarehouseId
+                     select warehouse;
+        
+        return await answer.Distinct().ToListAsync();
     }
 }
